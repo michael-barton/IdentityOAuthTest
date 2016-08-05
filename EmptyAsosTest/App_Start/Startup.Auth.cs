@@ -3,10 +3,12 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.Infrastructure;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
 using Shared;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -49,10 +51,31 @@ namespace EmptyAsosTest
                 {
                     OnGrantResourceOwnerCredentials = GrantResourceOwnerCredential,
                     OnValidateTokenRequest = ValidateTokenRequest,
-                    OnValidateClientAuthentication = ValidateClientAuthentication
+                    OnValidateClientAuthentication = ValidateClientAuthentication,
+                    OnAuthorizeEndpoint = AuthorizeEndPoint
+                },
+
+                // Authorization code provider which creates and receives authorization code
+                AuthorizationCodeProvider = new AuthenticationTokenProvider
+                {
+                    OnCreate = CreateAuthenticationCode,
+                    OnReceive = ReceiveAuthenticationCode,
+                },
+
+                // Refresh token provider which creates and receives referesh token
+                RefreshTokenProvider = new AuthenticationTokenProvider
+                {
+                    OnCreate = CreateRefreshToken,
+                    OnReceive = ReceiveRefreshToken,
                 }
             });
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
+            
+        }
+
+        private Task AuthorizeEndPoint(OAuthAuthorizeEndpointContext arg)
+        {
+            return Task.FromResult(0);
         }
 
         private Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext arg)
@@ -80,6 +103,34 @@ namespace EmptyAsosTest
             context.Validated(identity);
 
             return Task.FromResult(0);
+        }
+
+        private readonly ConcurrentDictionary<string, string> _authenticationCodes =
+            new ConcurrentDictionary<string, string>(StringComparer.Ordinal);
+
+        private void CreateAuthenticationCode(AuthenticationTokenCreateContext context)
+        {
+            context.SetToken(Guid.NewGuid().ToString("n") + Guid.NewGuid().ToString("n"));
+            _authenticationCodes[context.Token] = context.SerializeTicket();
+        }
+
+        private void ReceiveAuthenticationCode(AuthenticationTokenReceiveContext context)
+        {
+            string value;
+            if (_authenticationCodes.TryRemove(context.Token, out value))
+            {
+                context.DeserializeTicket(value);
+            }
+        }
+
+        private void CreateRefreshToken(AuthenticationTokenCreateContext context)
+        {
+            context.SetToken(context.SerializeTicket());
+        }
+
+        private void ReceiveRefreshToken(AuthenticationTokenReceiveContext context)
+        {
+            context.DeserializeTicket(context.Token);
         }
     }
 }
