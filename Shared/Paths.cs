@@ -12,5 +12,6 @@ namespace Shared
         public const string ResourceServerBaseAddress = "http://localhost:63249/";
         public const string TokenPath = @"/OAuth/Token";
         public const string ResourcePath = @"/api/Test";
+        public const string AuthorizePath = "/OAuth/Authorize";
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Owin;
-using Microsoft.Owin.Cors;
 using Owin;
 using System;
 using System.Collections.Generic;
@@ -14,13 +13,13 @@ namespace ResourceServer
     {
         public void Configuration(IAppBuilder app)
         {
-            HttpConfiguration config = new HttpConfiguration();
+            //HttpConfiguration config = new HttpConfiguration();
 
             ConfigureAuth(app);
 
-            WebApiConfig.Register(config);
-            app.UseCors(CorsOptions.AllowAll);
-            app.UseWebApi(config);
+            //WebApiConfig.Register(config);
+            //app.UseCors(CorsOptions.AllowAll);
+            //app.UseWebApi(config);
         }
     }
 }

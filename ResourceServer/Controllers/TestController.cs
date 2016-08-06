@@ -10,6 +10,7 @@ namespace ResourceServer.Controllers
     [Authorize]
     public class TestController : ApiController
     {
+        [Route("api/test/me")]
         public string Get()
         {
             return this.User.Identity.Name;

@@ -32,7 +32,7 @@ namespace GrantResourceOwnerCredentialsAccess
             var authorizationServerUri = new Uri(Paths.AuthorizationServerBaseAddress);
             var authorizationServer = new AuthorizationServerDescription
             {
-                //AuthorizationEndpoint = new Uri(authorizationServerUri, Paths.AuthorizePath),
+                AuthorizationEndpoint = new Uri(authorizationServerUri, Paths.AuthorizePath),
                 TokenEndpoint = new Uri(authorizationServerUri, Paths.TokenPath)
             };
             _webServerClient = new WebServerClient(authorizationServer, "mikeappid", "mikeappsecret");
